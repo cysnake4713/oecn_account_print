@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+    <record id="group_move_tree" model="res.groups">
+        <field name="name">直接输入凭证行</field>
+    </record>
+
+    </data>
+</openerp>

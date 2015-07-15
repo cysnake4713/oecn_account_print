@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id='report_currency_cash_journal'>
+            <t t-call='report.html_container'>
+                <t t-foreach='docs' t-as='o'>
+                    <t t-call="report.internal_layout">
+                        <div class='page'>
+                            <div class='row'>
+                                <div class='oe_structure'/>
+                                <div class='row'>
+                                    <h2 class='text-center'>
+                                        <span t-esc="type(data)['report_name']"/>
+                                    </h2>
+                                    <div class='col-xs-6'>
+                                        <span>科目：</span>
+                                        <span t-esc="account_name(data['account_id'][0])"/>
+                                    </div>
+                                </div>
+                                <div class='row'>
+                                    <div class='col-xs-6'>
+                                        <span>开始日期：</span>
+                                        <span t-esc="data['all_date']['period_start_date_start']"/>
+                                    </div>
+                                    <div class='col-xs-6 text-right'>
+                                        <span>结束日期</span>
+                                        <span t-esc="data['all_date']['period_end_date_stop']"/>
+                                    </div>
+                                </div>
+                                <style>
+                                    table.col-xs-12 td{border: 1px solid green}
+                                </style>
+
+                                <table class='col-xs-12 text-center'>
+                                    <thead>
+                                        <tr>
+                                            <td rowspan='2'>日期</td>
+                                            <td rowspan='2'>凭证字号</td>
+                                            <td rowspan='2'>摘要</td>
+                                            <td rowspan='2'>对方科目</td>
+                                            <td rowspan='2'>汇率</td>
+                                            <td colspan='2'>借方</td>
+                                            <td colspan='2'>贷方</td>
+                                            <td rowspan='2'>方向</td>
+                                            <td colspan='2'>余额</td>
+                                        </tr>
+                                        <tr>
+                                            <td>外币</td>
+                                            <td>金额</td>
+                                            <td>外币</td>
+                                            <td>金额</td>
+                                            <td>外币</td>
+                                            <td>金额</td>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td t-esc="data['all_date']['period_start_date_start']"/>
+                                            <td/>
+                                            <td>期初余额</td>
+                                            <td/>
+                                            <td/>
+                                            <td/>
+                                            <td/>
+                                            <td/>
+                                            <td/>
+                                            <td/>
+                                            <td t-esc="formatLang(final_print('balance_currency'))"/>
+                                            <td t-esc="formatLang(final_print('balance'))"/>
+                                        </tr>
+                                        <t t-foreach="lines(data['account_id'][0], by_day=True)" t-as='period'>
+                                            <t t-esc="period_clear()"/>
+                                            <t t-foreach="period['days']" t-as='days'>
+                                                <t t-esc="daily_clear()"/>
+                                                <t t-foreach="days['lines']" t-as='line'>
+                                                    <t t-esc="daily_push(line)"/>
+                                                    <t t-esc="period_push(line)"/>
+                                                    <t t-esc="year_push(line)"/>
+                                                    <t t-esc="final_push(line)"/>
+                                                    <tr>
+                                                        <td t-esc='line.date'/>
+                                                        <td t-esc='line.move_id.name'/>
+                                                        <td t-esc='line.name'/>
+                                                        <td t-esc="contrepartie([line.id])[line.id]"/>
+                                                        <td t-esc="formatLang(line.amount_currency and line.debit or line.credit / abs(line.amount_currency) or 0, digits=4)"/>
+                                                        <td t-esc="formatLang(line.debit and line.amount_currency)"/>
+                                                        <td t-esc="formatLang(line.debit)"/>
+                                                        <td t-esc="formatLang(line.credit and abs(line.amount_currency))"/>
+                                                        <td t-esc="formatLang(line.credit)"/>
+                                                        <td t-esc="get_direction(line.debit-line.credit)"/>
+                                                        <td t-esc="formatLang(final_print('balance_currency'))"/>
+                                                        <td t-esc="formatLang(final_print('balance'))"/>
+                                                    </tr>
+                                                </t>
+                                                <tr>
+                                                    <td/>
+                                                    <td/>
+                                                    <td>本日合计</td>
+                                                    <td/>
+                                                    <td/>
+                                                    <td t-esc="formatLang(daily_print('debit_currency'))"/>
+                                                    <td t-esc="formatLang(daily_print('debit'))"/>
+                                                    <td t-esc="formatLang(daily_print('credit_currency'))"/>
+                                                    <td t-esc="formatLang(daily_print('credit'))"/>
+                                                    <td t-esc="get_direction(daily_balance())"/>
+                                                    <td t-esc="formatLang(final_print('balance_currency'))"/>
+                                                    <td t-esc="formatLang(final_print('balance'))"/>
+                                                </tr>
+                                            </t>
+                                            <tr>
+                                                <td/>
+                                                <td/>
+                                                <td>本期合计</td>
+                                                <td/>
+                                                <td/>
+                                                <td t-esc="formatLang(period_print('debit_currency'))"/>
+                                                <td t-esc="formatLang(period_print('debit'))"/>
+                                                <td t-esc="formatLang(period_print('credit_currency'))"/>
+                                                <td t-esc="formatLang(period_print('credit'))"/>
+                                                <td t-esc="get_direction(period_balance())"/>
+                                                <td t-esc="formatLang(final_print('balance_currency'))"/>
+                                                <td t-esc="formatLang(final_print('balance'))"/>
+                                            </tr>
+                                            <tr>
+                                                <td/>
+                                                <td/>
+                                                <td>本年累计</td>
+                                                <td/>
+                                                <td/>
+                                                <td t-esc="formatLang(year_print('debit_currency'))"/>
+                                                <td t-esc="formatLang(year_print('debit'))"/>
+                                                <td t-esc="formatLang(year_print('credit_currency'))"/>
+                                                <td t-esc="formatLang(year_print('credit'))"/>
+                                                <td t-esc="get_direction(year_balance())"/>
+                                                <td t-esc="formatLang(final_print('balance_currency'))"/>
+                                                <td t-esc="formatLang(final_print('balance'))"/>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

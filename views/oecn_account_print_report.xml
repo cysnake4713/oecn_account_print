@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--print account move -->
+        <report
+            id="action_report_account_move"
+            string="凭证打印-qweb"
+            model="account.move"
+            report_type="qweb-pdf"
+            file="oecn_account_print.report_account_move"
+            name="oecn_account_print.report_account_move"
+        />
+        <!-- print account general -->
+        <report
+            id="general_ledger"
+            string="print account_account"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_general_ledger"
+            name="oecn_account_print.report_general_ledger"
+        />
+
+        <!-- print accont detail -->
+         <report
+            id="action_currency_cash_journal"
+            string="currency cash journal"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_currency_cash_journal"
+            name="oecn_account_print.report_currency_cash_journal"
+        />
+
+        <report
+            id="action_cash_journal"
+            string="cash journal"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_cash_journal"
+            name="oecn_account_print.report_cash_journal"
+        />
+        <report
+            id="action_threecolumns_ledger"
+            string="threecolumns ledger"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_threecolumns_ledger"
+            name="oecn_account_print.report_threecolumns_ledger"
+        />
+        <report
+            id="action_stock_ledger"
+            string="stock ledger"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_stock_ledger"
+            name="oecn_account_print.report_stock_ledger"
+        />
+    </data>
+</openerp>

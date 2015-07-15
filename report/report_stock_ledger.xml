@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_stock_ledger">
+            <t t-call="report.html_container">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <t t-set="data-report_format" t-value='A5'/>
+                <t t-foreach='docs' t-as='o'>
+                    <t t-call="report.internal_layout">
+                        <div class="page">
+                            <div class='row'>
+                                <div class='oe_structure'/>
+                                <div class='row'>
+                                    <h2 class='text-center'>
+                                        <span>产品明细分类账</span>
+                                    </h2>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class='col-xs-6 pull-left'>
+                                    <span>科目:</span>
+                                    <span t-esc="data['account_id'][1]"/>
+                                </div>
+                                <div class='col-xs-6 text-right'>
+                                    <t t-if="type(data)['product']">
+                                        <span>产品:</span>
+                                        <span t-esc="type(data)['product']"/>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class='col-xs-6 pull-left'>
+                                    <span>开始日期：</span>
+                                    <span t-esc="data['all_date']['period_start_date_start']"/>
+                                </div>
+                                <div class='col-xs-6 text-right'>
+                                    <span>结束日期：</span>
+                                    <span t-esc="data['all_date']['period_end_date_stop']"/>
+                                </div>
+                            </div>
+
+                            <style>
+                                table.col-xs-12 td{border: 1px solid green}
+                            </style>
+                            <table class='col-xs-12 text-center'>
+                                <thead>
+                                    <tr>
+                                        <td rowspan='2' height='80px' class='col-xs-1'>日期</td>
+                                        <td rowspan='2' height='80px' class='col-xs-1'>凭证字号</td>
+                                        <td rowspan='2' height='80px' class='col-xs-1'>摘要</td>
+                                        <td rowspan='2' height='80px' class='col-xs-1'>对方科目</td>
+                                        <td colspan='3' height='40px' class='col-xs-2'>借方</td>
+                                        <td colspan='3' height='40px' class='col-xs-2'>贷方</td>
+                                        <td rowspan='2' height='80px' class='col-xs-1'>方向</td>
+                                        <td colspan='3' height='40px' class='col-xs-2'>余额</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <para style="P5">数量</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">单价</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">金额</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">数量</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">单价</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">金额</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">数量</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">单价</para>
+                                        </td>
+                                        <td>
+                                            <para style="P5">金额</para>
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td t-esc="data['all_date']['period_start_date_start']"/>
+                                        <td/>
+                                        <td>期初余额</td>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td/>
+                                        <td t-esc="formatLang(final_print('balance_quantity'))"/>
+                                        <td/>
+                                        <td t-esc="formatLang(final_print('balance'))"/>
+                                    </tr>
+
+                                    <t t-foreach="lines(data['form']['account_id'][0])" t-as="period">
+                                        <t t-esc="period_clear()"/>
+                                        <t t-foreach="period['lines']" t-as="line">
+                                            <tr>
+                                                <t t-esc="period_push(line)"/>
+                                                <t t-esc="year_push(line)"/>
+                                                <t t-esc="final_push(line)"/>
+
+                                                <td t-esc="line.date"/>
+                                                <td t-esc="line.move_id.name"/>
+                                                <td t-esc="line.name"/>
+                                                <td t-esc="contrepartie([line.id])[line.id]"/>
+                                                <td t-esc="formatLang(line.debit and line.quantity)"/>
+                                                <td t-esc="formatLang(line.debit and (line.debit/line.quantity if line.quantity else 0.0))"/>
+                                                <td t-esc="formatLang(line.debit)"/>
+                                                <td t-esc="formatLang(line.credit and line.quantity)"/>
+                                                <td t-esc="formatLang(line.credit and(line.credit/line.quantity if line.quantity else 0.0))"/>
+                                                <td t-esc="formatLang(line.credit)"/>
+                                                <td t-esc="get_direction(line.debit-line.credit)"/>
+                                                <td t-esc="formatLang(final_print('balance_quantity'))"/>
+                                                <td/>
+                                                <td t-esc="formatLang(final_print('balance'))"/>
+                                            </tr>
+                                        </t>
+                                        <tr>
+                                            <td/>
+                                            <td/>
+                                            <td>本期合计</td>
+                                            <td/>
+                                            <td t-esc="formatLang(period_print('debit_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(period_print('debit'))"/>
+                                            <td t-esc="formatLang(period_print('credit_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(period_print('credit'))"/>
+                                            <td t-esc="get_direction(period_balance())"/>
+                                            <td t-esc="formatLang(final_print('balance_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(final_print('balance'))"/>
+                                        </tr>
+                                        <tr>
+                                            <td/>
+                                            <td/>
+                                            <td>本年累计</td>
+                                            <td/>
+                                            <td t-esc="formatLang(year_print('debit_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(year_print('debit'))"/>
+                                            <td t-esc="formatLang(year_print('credit_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(year_print('credit'))"/>
+                                            <td t-esc="get_direction(year_balance())"/>
+                                            <td t-esc="formatLang(final_print('balance_quantity'))"/>
+                                            <td/>
+                                            <td t-esc="formatLang(final_print('balance'))"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

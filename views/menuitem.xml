@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="action_account_periodly_all" model="ir.actions.act_window">
+            <field name="name">科目余额表</field>
+            <field name="res_model">account.periodly</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="view_account_periodly_search"/>
+            <field name="view_id" ref="view_account_periodly_tree"/>
+            <field name="context">{'group_by':[], 'group_by_no_leaf':0}</field>
+        </record>
+        <record id="action_china_move_journal_line" model="ir.actions.act_window">
+            <field name="name">China Journal Entries</field>
+            <field name="res_model">account.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="account.view_account_move_filter"/>
+        </record>
+        <record id="action_china_move_journal_line_view1" model="ir.actions.act_window.view">
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="account.view_move_tree"/>
+            <field name="act_window_id" ref="action_china_move_journal_line"/>
+        </record>
+        <record id="action_china_move_journal_line_view2" model="ir.actions.act_window.view">
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_china_account_move_form"/>
+            <field name="act_window_id" ref="action_china_move_journal_line"/>
+        </record>
+
+        <record id="action_china_move_journal_line_easy" model="ir.actions.act_window">
+            <field name="name">中国凭证</field>
+            <field name="res_model">account.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="account.view_account_move_filter"/>
+        </record>
+        <record id="action_china_move_journal_line_easy_view1" model="ir.actions.act_window.view">
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="account.view_move_tree"/>
+            <field name="act_window_id" ref="action_china_move_journal_line_easy"/>
+        </record>
+        <record id="action_china_move_journal_line_easy_view2" model="ir.actions.act_window.view">
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_china_account_move_form_easy"/>
+            <field name="act_window_id" ref="action_china_move_journal_line_easy"/>
+        </record>
+
+        <!-- Add menu item under account/report menu -->
+        <menuitem name="China Account" id="menu_china_account" parent="account.menu_finance" sequence="4" groups="account.group_account_user"/>
+        <menuitem name="China Entries Easy" id="menu_china_account_move_easy" parent="menu_china_account" sequence="10" action="action_china_move_journal_line_easy"/>
+        <menuitem name="China Entries" id="menu_china_account_move" parent="menu_china_account" sequence="12" action="action_china_move_journal_line"/>
+        <menuitem name="China Reports" id="menu_oecn_account_print" parent="menu_china_account" sequence="99"/>
+        <menuitem name="科目余额表" action="action_account_periodly_all" id="menu_action_account_periodly_all"
+                  parent="menu_oecn_account_print"
+                  sequence="1"/>
+        <menuitem icon="STOCK_PRINT" action="action_oecn_general_report" id="menu_general_ledger" parent="menu_oecn_account_print" sequence="10"/>
+        <menuitem icon="STOCK_PRINT" action="action_oecn_detail_report" id="menu_detail_ledger" parent="menu_oecn_account_print" sequence="20"/>
+
+    </data>
+</openerp>
