@@ -44,18 +44,19 @@
 
                             <style>
                                 table.col-xs-12 td{border: 1px solid green}
+                                tr.comment { font-size: 15px; color: blue;}
                             </style>
                             <table class='col-xs-12 text-center'>
                                 <thead>
                                     <tr>
-                                        <td height='40px' class='col-xs-2'>日期</td>
-                                        <td class='col-xs-2'>凭证字号</td>
-                                        <td class='col-xs-1'>摘要</td>
-                                        <td class='col-xs-2'>对方科目</td>
+                                        <td height='40px' class='col-xs-1'>日期</td>
+                                        <td class='col-xs-1'>凭证字号</td>
+                                        <td class='col-xs-3'>摘要</td>
+                                        <td class='col-xs-3'>对方科目</td>
                                         <td class='col-xs-1'>借方</td>
                                         <td class='col-xs-1'>贷方</td>
                                         <td class='col-xs-1'>方向</td>
-                                        <td class='col-xs-2'>余额</td>
+                                        <td class='col-xs-1'>余额</td>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -79,15 +80,15 @@
 
                                                 <td t-esc="line.date"/>
                                                 <td t-esc="line.move_id.name"/>
-                                                <td t-esc="line.name"/>
-                                                <td t-esc="contrepartie([line.id])[line.id]"/>
+                                                <td class="text-left" style="padding-left: 5px;" t-esc="line.name"/>
+                                                <td class="text-left" style="padding-left: 5px;" t-esc="contrepartie([line.id])[line.id]"/>
                                                 <td t-esc="formatLang(line.debit)"/>
                                                 <td t-esc="formatLang(line.credit)"/>
                                                 <td t-esc="get_direction(line.debit-line.credit)"/>
                                                 <td t-esc="formatLang(final_print('balance'))"/>
                                             </tr>
                                         </t>
-                                        <tr>
+                                        <tr class="comment">
                                             <td/>
                                             <td/>
                                             <td>本期合计</td>
@@ -97,17 +98,17 @@
                                             <td t-esc="get_direction(period_balance())"/>
                                             <td t-esc="formatLang(final_print('balance'))"/>
                                         </tr>
-                                        <tr>
-                                            <td/>
-                                            <td/>
-                                            <td>本年累计</td>
-                                            <td/>
-                                            <td t-esc="formatLang(year_print('debit'))"/>
-                                            <td t-esc="formatLang(year_print('credit'))"/>
-                                            <td t-esc="get_direction(year_balance())"/>
-                                            <td t-esc="formatLang(final_print('balance'))"/>
-                                        </tr>
                                     </t>
+                                    <tr class="comment">
+                                        <td/>
+                                        <td/>
+                                        <td>本年累计</td>
+                                        <td/>
+                                        <td t-esc="formatLang(year_print('debit'))"/>
+                                        <td t-esc="formatLang(year_print('credit'))"/>
+                                        <td t-esc="get_direction(year_balance())"/>
+                                        <td t-esc="formatLang(final_print('balance'))"/>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

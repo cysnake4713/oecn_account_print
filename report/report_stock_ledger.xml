@@ -43,6 +43,7 @@
 
                             <style>
                                 table.col-xs-12 td{border: 1px solid green}
+                                tr.comment { font-size: 15px; color: blue;}
                             </style>
                             <table class='col-xs-12 text-center'>
                                 <thead>
@@ -114,8 +115,8 @@
 
                                                 <td t-esc="line.date"/>
                                                 <td t-esc="line.move_id.name"/>
-                                                <td t-esc="line.name"/>
-                                                <td t-esc="contrepartie([line.id])[line.id]"/>
+                                                <td class="text-left" style="padding-left: 5px;" t-esc="line.name"/>
+                                                <td class="text-left" style="padding-left: 5px;" t-esc="contrepartie([line.id])[line.id]"/>
                                                 <td t-esc="formatLang(line.debit and line.quantity)"/>
                                                 <td t-esc="formatLang(line.debit and (line.debit/line.quantity if line.quantity else 0.0))"/>
                                                 <td t-esc="formatLang(line.debit)"/>
@@ -128,7 +129,7 @@
                                                 <td t-esc="formatLang(final_print('balance'))"/>
                                             </tr>
                                         </t>
-                                        <tr>
+                                        <tr class="comment">
                                             <td/>
                                             <td/>
                                             <td>本期合计</td>
@@ -144,23 +145,23 @@
                                             <td/>
                                             <td t-esc="formatLang(final_print('balance'))"/>
                                         </tr>
-                                        <tr>
-                                            <td/>
-                                            <td/>
-                                            <td>本年累计</td>
-                                            <td/>
-                                            <td t-esc="formatLang(year_print('debit_quantity'))"/>
-                                            <td/>
-                                            <td t-esc="formatLang(year_print('debit'))"/>
-                                            <td t-esc="formatLang(year_print('credit_quantity'))"/>
-                                            <td/>
-                                            <td t-esc="formatLang(year_print('credit'))"/>
-                                            <td t-esc="get_direction(year_balance())"/>
-                                            <td t-esc="formatLang(final_print('balance_quantity'))"/>
-                                            <td/>
-                                            <td t-esc="formatLang(final_print('balance'))"/>
-                                        </tr>
                                     </t>
+                                    <tr class="comment">
+                                        <td/>
+                                        <td/>
+                                        <td>本年累计</td>
+                                        <td/>
+                                        <td t-esc="formatLang(year_print('debit_quantity'))"/>
+                                        <td/>
+                                        <td t-esc="formatLang(year_print('debit'))"/>
+                                        <td t-esc="formatLang(year_print('credit_quantity'))"/>
+                                        <td/>
+                                        <td t-esc="formatLang(year_print('credit'))"/>
+                                        <td t-esc="get_direction(year_balance())"/>
+                                        <td t-esc="formatLang(final_print('balance_quantity'))"/>
+                                        <td/>
+                                        <td t-esc="formatLang(final_print('balance'))"/>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
