@@ -55,6 +55,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
+                                            <t t-esc="final_init(get_initial_balance(a.id))"/>
                                             <td t-esc="data['all_date']['fiscalyear_obj_date_start'][5:7]"/>
                                             <td t-esc="data['all_date']['fiscalyear_obj_date_start'][8:10]"/>
                                             <td>年初余额</td>

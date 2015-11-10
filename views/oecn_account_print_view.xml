@@ -69,9 +69,9 @@
                                             </page>
                                             <page string="现金">
                                                 <group>
-                                                    <field name="amount_currency"/>
-                                                    <field name="currency_rate"/>
-                                                    <field name="currency_id"/>
+                                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                                    <field name="currency_rate" groups="base.group_multi_currency"/>
+                                                    <field name="amount_currency" groups="base.group_multi_currency"/>
                                                     <field name="statement_id"/>
                                                 </group>
                                             </page>
@@ -87,9 +87,9 @@
                                         <field name="account_id"/>
                                         <field name="debit" sum="Total Debit"/>
                                         <field name="credit" sum="Total Credit"/>
-                                        <field name="currency_id"/>
-                                        <field name="currency_rate"/>
-                                        <field name="amount_currency"/>
+                                        <field name="currency_id" groups="base.group_multi_currency"/>
+                                        <field name="currency_rate" groups="base.group_multi_currency"/>
+                                        <field name="amount_currency" groups="base.group_multi_currency"/>
                                         <!--<field name="analytic_account_id" domain="[('type','!=','view')]"/>-->
                                         <field name="partner_id" on_change="onchange_partner_id(False,partner_id,account_id,debit,credit,date)"/>
                                         <field name="date" invisible="1"/>
@@ -138,6 +138,7 @@
                     <field name="starting_balance"/>
                     <field name="debit"/>
                     <field name="credit"/>
+                    <field name="balance"/>
                     <field name="ending_balance"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
@@ -152,6 +153,9 @@
                     <field name="period_id"/>
                     <field name="account_id"/>
                     <field name="company_id" groups="base.group_multi_company"/>
+                    <group string="分组">
+                        <filter string="会计期间" name="period_group" context="{'group_by': 'period_id'}"/>
+                    </group>
                 </search>
             </field>
         </record>

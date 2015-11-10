@@ -23,3 +23,4 @@
 
 import account_move
 import account_ledger
+import account_financial

@@ -43,6 +43,10 @@ class report_account_ledger(report_sxw.rml_parse):
             'balance_quantity': 0.0,
         }
 
+        def init(values):
+            a['balance'] = values[0]
+            a['balance_currency'] = values[1]
+
         def push_line(line):
             a['balance'] += line.debit - line.credit
             a['balance_currency'] += line.amount_currency
@@ -56,7 +60,7 @@ class report_account_ledger(report_sxw.rml_parse):
             a['balance_currency'] = 0.0
             a['balance_quantity'] = 0.0
 
-        return result, push_line, clear
+        return init, result, push_line, clear
 
     @staticmethod
     def _data_closure():
@@ -107,10 +111,7 @@ class report_account_ledger(report_sxw.rml_parse):
         daily_print, daily_balance, daily_push, daily_clear = self._data_closure()
         period_print, period_balance, period_push, period_clear = self._data_closure()
         year_print, year_balance, year_push, year_clear = self._data_closure()
-        # final one just use debit value
-        final_print, final_push, final_clear = self._balance_closure()
-        # TODO: build final count with init value
-        # final_push({'balance':0.0,'balance_currency':0.0})
+        final_init, final_print, final_push, final_clear = self._balance_closure()
         self.localcontext.update({
             'time': time,
             'lines': self._get_lines,
@@ -135,8 +136,39 @@ class report_account_ledger(report_sxw.rml_parse):
             'final_print': final_print,
             'final_push': final_push,
             'final_clear': final_clear,
+            'final_init': final_init,
+            'get_initial_balance': self._get_initial_balance,
         })
         self.context = context
+
+    def _get_initial_balance(self, account_id):
+        account_obj = self.pool.get('account.account')
+        period_obj = self.pool.get('account.period')
+        move_obj = self.pool.get('account.move')
+
+        fiscalyear = self.pool.get('account.fiscalyear').browse(self.cr, self.uid, self.localcontext['fiscalyear_id'])
+        account_child_ids = account_obj.search(self.cr, self.uid, [('parent_id', 'child_of', account_id)])
+        debit = credit = balance = balance_currency = 0.0
+        # 计算开账到期初前余额
+        # if account user_type close_method is none(不结转)
+        # if account user_type close method is balance(余额)
+        # if account user_type close method is detail(全部结转)
+        # if account user_type close method is unreconciled(未核销)
+        # TODO:是否关账判断支持 if period_journal.period_id.state == 'done': sql:AND m.state IN %s
+        period_open = [p.id for p in fiscalyear.period_ids if p.special][0]
+        period_ids = period_obj.build_ctx_periods_in_company(self.cr, self.uid, period_open, self.localcontext['period_from_id'])
+        period_ids.remove(self.localcontext['period_from_id'])
+
+        ids_move = move_obj.search(self.cr, self.uid, [('period_id', 'in', period_ids)])
+        if ids_move:
+            self.cr.execute("""
+              SELECT COALESCE(SUM(l.debit),0.0), COALESCE(SUM(l.credit),0.0), COALESCE(sum(debit-credit), 0.0), COALESCE(SUM(l.amount_currency),0.0)
+              FROM account_move_line AS l, account_move AS m
+              WHERE m.id = l.move_id AND m.id in %s AND l.account_id IN %s
+            """, (tuple(ids_move), tuple(account_child_ids)))
+            debit, credit, balance, balance_currency = self.cr.fetchall()[0]
+
+        return balance, balance_currency
 
     def set_context(self, objects, data, ids, report_type=None):
         """
@@ -151,6 +183,8 @@ class report_account_ledger(report_sxw.rml_parse):
         self.sql_condition = self.get_threecolumns_ledger_type(data)
         self.localcontext['period_from_id'] = data['period_from'][0]
         self.localcontext['period_to_id'] = data['period_to'][0]
+        self.localcontext['fiscalyear_id'] = data['fiscalyear'][0]
+        self.localcontext['is_show_date'] = data.get('is_show_date', False)
 
         super(report_account_ledger, self).set_context(objects, data, ids, report_type)
 

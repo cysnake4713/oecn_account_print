@@ -26,3 +26,4 @@
 ##############################################################################
 
 import oecn_account_print_wizard
+import account_financial_print_wizard

@@ -61,6 +61,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                        <t t-esc="final_init(get_initial_balance(data['form']['account_id'][0]))"/>
                                         <td t-esc="data['all_date']['period_start_date_start']"/>
                                         <td/>
                                         <td>期初余额</td>

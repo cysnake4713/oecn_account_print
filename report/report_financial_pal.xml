@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_pal_financial">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="report.internal_layout">
+                        <div class="page">
+                            <h2 class='text-center'>利润表</h2>
+                            <div class="row mt32 mb32">
+                                <div class="col-xs-4">
+                                    <strong>编制单位:</strong>
+                                    <p t-esc="get_account(data)"/>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong>财年:</strong>
+                                    <p t-esc="get_fiscalyear(data)"/>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong>过滤:</strong>
+                                    <p>
+                                        <span t-if="data['form']['filter'] == 'filter_no'">全年</span>
+                                        <span t-if="data['form']['filter'] == 'filter_period'">会计周期</span>
+                                        <span t-if="data['form']['filter'] == 'filter_date'">日期期间</span>
+                                        <p t-if="data['form']['filter'] == 'filter_period'">
+                                            开始周期:
+                                            <span t-esc="get_start_period(data)"/>
+                                            结束周期:
+                                            <span t-esc="get_end_period(data)"/>
+                                        </p>
+                                        <p t-if="data['form']['filter'] == 'filter_date'">
+                                            开始日期:
+                                            <span t-esc="formatLang(get_start_date(data), date=True)"/>
+                                            <br/>
+                                            结束日期 :
+                                            <span t-esc="formatLang(get_end_date(data), date=True)"/>
+                                        </p>
+                                    </p>
+                                </div>
+                                <!--<div class="col-xs-3">-->
+                                <!--<strong>Target Moves:</strong>-->
+                                <!--<p t-esc="get_target_move(data)"/>-->
+                                <!--</div>-->
+                            </div>
+                            <style>
+                                body {
+                                   font-size: 16px;
+                                }
+                               .padding_override {
+                                    padding-left: 2px !important;
+                                    padding-right: 2px !important;
+                                }
+                                .row_margin {
+                                    margin-left: -50px !important;
+                                }
+                                .important_row {
+                                    font-size: 18px;
+                                    font-weight: bold !important;
+                                }
+                            </style>
+                            <table class="table col-xs-12">
+                                <thead>
+                                    <tr>
+                                        <th>项目</th>
+                                        <th class="text-center col-xs-1">行次</th>
+                                        <t t-if="data['form']['debit_credit'] == 1">
+                                            <th class="text-right">借方</th>
+                                            <th class="text-right">贷方</th>
+                                        </t>
+                                        <th class="text-right">余额</th>
+                                        <t t-if="data['form']['enable_filter'] == 1 and not data['form']['debit_credit']">
+                                            <th class="text-right">
+                                                <span t-esc="data['form']['label_filter']"/>
+                                            </th>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="get_lines(data)" t-as="a">
+                                        <t t-if="a['level'] != 0">
+                                            <td>
+                                                <div t-att-class="'row row_margin important_row' if a.get('important') else 'row row_margin'">
+                                                    <div t-att-class="'padding_override text-right col-xs-2 col-xs-offset-'+ str(a['level']-1)"
+                                                         t-esc="a.get('plus_word')"/>
+                                                    <div class="col-xs-9 padding_override" t-esc="a.get('name')"/>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-esc="a_index"/>
+                                            </td>
+                                            <t t-if="data['form']['debit_credit'] == 1">
+                                                <td class="text-right" style="white-space: nowrap;">
+                                                    <span t-att-style="style"
+                                                          t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
+                                                </td>
+                                                <td class="text-right" style="white-space: nowrap;">
+                                                    <span t-att-style="style"
+                                                          t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
+                                                </td>
+
+                                            </t>
+                                            <td class="text-right" style="white-space: nowrap;">
+                                                <span t-att-style="style"
+                                                      t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
+                                            </td>
+                                            <t t-if="data['form']['enable_filter'] == 1 and not data['form']['debit_credit']">
+                                                <td class="text-right">
+                                                    <span t-att-style="style"
+                                                          t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
+                                                </td>
+                                            </t>
+
+                                        </t>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

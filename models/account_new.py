@@ -31,7 +31,6 @@ class AccountMove(models.Model):
     添加制单、审核、附件数三个字段
     """
     proof = fields.Integer('Attachment Count', required=False, default=1)
-    company_id = fields.Many2one('res.company', readonly=True, related='journal_id.company_id')
 
     """
     附件数默认为1张
@@ -41,64 +40,27 @@ class AccountMove(models.Model):
         'journal_id': lambda self, cr, uid, context: self.pool.get('account.journal').search(cr, uid, [('type', '=', 'general')], limit=1)[0],
     }
 
-    @api.onchange('date', 'journal_id')
-    def _onchange_date(self):
-        if self.date and self.journal_id:
-            self.period_id = self.env['account.period'].with_context(company_id=self.journal_id.company_id.id).find(dt=self.date)
-
 
 class AccountMoveLine(models.Model):
-    _name = 'account.move.line'
     _inherit = 'account.move.line'
 
-    currency_rate = fields.Float('Currency Rate', digits=(10, 4))
+    currency_rate = fields.Float('Currency Rate', digits=(10, 6), compute='_compute_currency_rate')
 
-    @api.onchange('account_id')
-    def _onchange_account(self):
-        if self.account_id:
-            self.currency_id = self.account_id.currency_id
-
-    @api.onchange('currency_rate', 'currency_id', 'amount_currency')
-    def _onchange_currency_rate(self):
-        if not ((self.debit and self.credit) or (not self.debit and not self.credit)) and self.currency_rate and not self.amount_currency:
-            # if need calc amount_currency
-            total_amount = self.debit if self.debit else -self.credit
-            self.amount_currency = total_amount / self.currency_rate
-        elif not ((self.debit and self.credit) or (not self.debit and not self.credit)) and not self.currency_rate and self.amount_currency:
-            # need calc currency_rate
-            total_amount = self.debit if self.debit else -self.credit
-            self.currency_rate = abs(total_amount / self.amount_currency)
-        elif not (self.debit or self.credit) and self.currency_rate and self.amount_currency:
-            # need calc debit or credit
-            total_amount = self.amount_currency * self.currency_rate
-            self.debit = total_amount > 0 and total_amount or 0.0
-            self.credit = total_amount < 0 and -total_amount or 0.0
-
-
-class AccountFiscalyear(models.Model):
-    _name = 'account.fiscalyear'
-    _inherit = 'account.fiscalyear'
-
-    @api.multi
-    def name_get(self):
-        result = []
+    @api.depends('credit', 'debit', 'amount_currency')
+    def _compute_currency_rate(self):
         for record in self:
-            result.append((record.id, u'%s (%s)' % (record.name, record.company_id.name if record.company_id else '')))
-        return result
+            if record.currency_id:
+                if record.amount_currency:
+                    record.currency_rate = abs((record.debit or record.credit) / record.amount_currency)
+                else:
+                    record.currency_rate = False
 
 
 class AccountPeriod(models.Model):
     _name = 'account.period'
     _inherit = 'account.period'
 
-    @api.multi
-    def name_get(self):
-        result = []
-        for record in self:
-            result.append((record.id, u'%s (%s)' % (record.name, record.company_id.name if record.company_id else '')))
-        return result
-
-    @api.v7
+    @api.cr_uid
     def build_ctx_periods_in_company(self, cr, uid, period_from_id, period_to_id):
         if period_from_id == period_to_id:
             return [period_from_id]
@@ -123,23 +85,3 @@ class AccountPeriod(models.Model):
                                [('date_start', '>=', period_date_start), ('date_stop', '<=', period_date_stop), ('company_id', '=', company2_id)])
         return self.search(cr, uid, [('date_start', '>=', period_date_start), ('date_stop', '<=', period_date_stop), ('special', '=', False),
                                      ('company_id', '=', company2_id)])
-
-
-class AccountJournal(models.Model):
-    _name = 'account.journal'
-    _inherit = 'account.journal'
-
-    @api.multi
-    def name_get(self):
-        """
-        @return: Returns a list of tupples containing id, name
-        """
-        res = []
-        for rs in self:
-            if rs.currency:
-                currency = rs.currency
-            else:
-                currency = rs.company_id.currency_id
-            name = "%s (%s)%s" % (rs.name, currency.name, ('-%s' % rs.company_id.name) if rs.company_id else '')
-            res += [(rs.id, name)]
-        return res

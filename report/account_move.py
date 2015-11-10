@@ -74,14 +74,12 @@ class report_account_move_common(report_sxw.rml_parse):
         Why not get it from currency code + date ?
         '''
         exchange_rate = False
-        if line.currency_rate:
-            exchange_rate = line.currency_rate
         if line.amount_currency:
             if line.debit > 0:
                 exchange_rate = line.debit / line.amount_currency
             if line.credit > 0:
                 exchange_rate = line.credit / (-1 * line.amount_currency)
-        return round(exchange_rate, 4)
+        return round(exchange_rate, 6)
 
     def _get_unit_price(self, line):
         '''

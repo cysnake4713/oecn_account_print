@@ -59,5 +59,23 @@
             file="oecn_account_print.report_stock_ledger"
             name="oecn_account_print.report_stock_ledger"
         />
+        <report
+            id="action_account_pal"
+            string="Gain And Loss"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_oe_cn_pal_financial"
+            name="oecn_account_print.report_oe_cn_pal_financial"
+        />
+        <report
+            id="action_account_aab"
+            string="Asset And Liability"
+            model="account.account"
+            report_type="qweb-pdf"
+            menu="False"
+            file="oecn_account_print.report_oe_cn_aab_financial"
+            name="oecn_account_print.report_oe_cn_aab_financial"
+        />
     </data>
 </openerp>

@@ -119,24 +119,107 @@ class account_periodly(osv.osv):
 
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'account_periodly')
+        # 感谢 hdjmd <hdjmd@qq.com> 提供科目余额表的sql优化~
         cr.execute("""
-            create or replace view account_periodly as (
-            select
-                min(l.id) as id,
-                p.fiscalyear_id as fiscalyear_id,
-                p.id as period_id,
-                l.account_id as account_id,
-                sum(l.debit) as debit,
-                sum(l.credit) as credit,
-                sum(l.debit-l.credit) as balance,
-                p.date_start as date,
-                am.company_id as company_id
-            from
-                account_move_line l
-                left join account_account a on (l.account_id = a.id)
-                left join account_move am on (am.id=l.move_id)
-                left join account_period p on (am.period_id=p.id)
-            where l.state != 'draft'
-            group by p.id, l.account_id, p.fiscalyear_id, p.date_start, am.company_id
-            )
+CREATE OR REPLACE VIEW account_periodly AS (
+  SELECT
+    t.fiscalyear_id,
+    period_id,
+    account_id,
+    debit,
+    credit,
+    balance,
+    date,
+    t.company_id,
+    t.id
+  FROM
+    (SELECT
+       fiscalyear_id,
+       period_id,
+       account_id,
+       debit,
+       credit,
+       balance,
+       date,
+       company_id,
+       row_number()
+       OVER (
+         ORDER BY period_id, account_id, company_id) AS id
+     FROM
+       (SELECT
+          fiscalyear_id           fiscalyear_id,
+          period_id               period_id,
+          account_id              account_id,
+          sum(a.debit)            debit,
+          sum(a.credit)           credit,
+          sum(a.debit - a.credit) balance,
+          date                    date,
+          company_id              company_id
+        FROM
+          (
+            SELECT
+              b.fiscalyear_id         AS fiscalyear_id,
+              b.id                    AS period_id,
+              a.account_id            AS account_id,
+              sum(a.debit)            AS debit,
+              sum(a.credit)           AS credit,
+              sum(a.debit - a.credit) AS balance,
+              b.date_start            AS date,
+              a.company_id            AS company_id
+            FROM
+              account_move_line a
+              LEFT JOIN account_period b
+                ON a.period_id = b.id AND a.company_id = b.company_id
+            WHERE a.state != 'draft' AND b.special = FALSE
+            GROUP BY
+              b.fiscalyear_id,
+              b.id,
+              a.account_id,
+              b.date_start,
+              a.company_id
+            UNION ALL
+            SELECT
+              DISTINCT
+              b.fiscalyear_id fiscalyear_id,
+              a.period_id     period_id,
+              a.account_id    account_id,
+              0               debit,
+              0               credit,
+              0               balance,
+              b.date_start    date,
+              a.company_id    company_id
+            FROM
+              (
+                SELECT
+                  DISTINCT
+                  b.account_id,
+                  b.company_id,
+                  a.period_id
+                FROM account_move_line a
+                  LEFT JOIN
+                  (SELECT DISTINCT
+                     account_id,
+                     company_id,
+                     period_id
+                   FROM account_move_line
+                  ) b
+                    ON a.company_id = b.company_id
+                WHERE a.period_id > b.period_id
+              ) a LEFT JOIN
+              account_period b
+                ON a.period_id = b.id AND a.company_id = b.company_id
+          ) a
+        GROUP BY
+          fiscalyear_id,
+          period_id,
+          account_id,
+          date,
+          company_id
+       ) a
+    ) t
+    LEFT JOIN account_period ap
+      ON t.period_id = ap.id
+  WHERE ap.special = FALSE
+)
+
         """)

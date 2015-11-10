@@ -17,6 +17,10 @@
                                         <span t-esc="type(data)['report_name']"/>
                                     </h2>
                                 </div>
+                                <div class='col-xs-6'>
+                                    <span>科目：</span>
+                                    <span t-esc="account_name(data['account_id'][0])"/>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class='col-xs-6 pull-left'>
@@ -47,6 +51,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                        <t t-esc="final_init(get_initial_balance(data['form']['account_id'][0]))"/>
                                         <td t-esc="data['all_date']['period_start_date_start']"/>
                                         <td/>
                                         <td>期初余额</td>
@@ -76,7 +81,7 @@
                                                     <td t-esc="formatLang(final_print('balance'))"/>
                                                 </tr>
                                             </t>
-                                            <tr class="comment">
+                                            <tr t-if="is_show_date" class="comment">
                                                 <td/>
                                                 <td/>
                                                 <td>本日合计</td>
