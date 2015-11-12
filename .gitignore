@@ -21,7 +21,6 @@ _build/
 /man/
 /share/
 /src/
-/data
 /log
 
 atlassian-ide-plugin.xml
